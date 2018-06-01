@@ -1,0 +1,194 @@
+{% raw %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link href="/static/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <link href="/static/css/bootstrap-datetimepicker.min.css" rel="stylesheet" media="screen">
+    <link rel="stylesheet" href="/static/Scripts/element-ui/lib/theme-chalk/index.css" />
+    <!-- Custom styles for this template -->
+    <link href="/static/css/4-col-portfolio.css" rel="stylesheet">
+    <script type="text/javascript" src="/static/jquery/jquery.min.js" charset="UTF-8"></script>
+    <script type="text/javascript" src="/static/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/static/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script type="text/javascript" src="/static/js/bootstrap-datetimepicker.js" charset="UTF-8"></script>
+    <script type="text/javascript" src="/static/js/locales/bootstrap-datetimepicker.fr.js" charset="UTF-8"></script>
+    <script src="/static/Scripts/axios/dist/axios.min.js"></script>
+    <script type="text/javascript" src="/static/Scripts/vue/dist/vue.min.js" charset="UTF-8"></script>
+    <script src="/static/Scripts/element-ui/lib/index.js"></script>
+    <title>Document</title>
+    <style>
+        h1 {
+            text-align: center;
+        }
+
+                        
+        table {
+            width: 100%;
+            font-size: 18px;
+            margin-top: 10vh
+        }
+
+        td {
+            width: 20%;
+        }
+
+        .el-radio__label {
+            font-size: 18px;
+        }
+
+        /* .el-button {
+            margin: 10vh 48%
+        } */
+
+        .btnContainer {
+            width: 20vw;
+            margin:10vh 39vw;
+        }
+
+        header {
+            background: #051A02;
+            padding-bottom: 3vh;
+            padding-top: 3vh
+        }
+
+        .showResult {
+            text-align: center;
+            margin: 10vh auto;
+            font-size: 18px;
+        }
+    </style>
+    <script>
+        window.onload = function () {
+            var vm = new Vue({
+                el: "#app",
+                data: {
+                    datas:{},
+                    radio: '1',
+                    result: '',
+                    mode: '',
+                    value1:'',
+                    value2:'',
+                    startTime:'',
+                    endTime:'',
+                },
+
+                //页面加载时获取当前设置
+                // axios.get('/Hjkhjhj').then()
+                methods: {
+                    submitSettings: function () {
+                           
+                          if (this.radio == '1') {
+                              this.mode = "运动检测模式"
+                          } else  {
+                              this.mode = "考勤检测模式"
+                          }
+                         this.startTime = this.value1.getHours() + ':' + this.value1.getMinutes() + ':' + this.value1.getSeconds()
+                         this.endTime = this.value2.getHours() + ':' + this.value2.getMinutes() + ':' + this.value2.getSeconds()
+                         this.result = '开始时间:' + this.startTime + '' + '     结束时间:' + this.endTime + '' + '      检测模式:' + this.mode
+                        
+                         axios.post('/update_settings',{
+                                start: this.value1,
+                                end:this.value2,
+                                mode:this.mode,
+                                })//不需要返回数据
+                        
+                    },
+                    resetSettings: function () {
+                        this.value1 = ''
+                        this.value2 = ''
+                        this.result = ''
+                        axios.get('/reset_settings', {          
+
+                        })
+                    },
+                }
+            })
+        }
+    </script>
+</head>
+
+<body>
+    <header class="text-white ">
+        <div class="container text-center">
+            <h1>人脸考勤与陌生人鉴别视频监控管理系统</h1>
+        </div>
+    </header>>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark position fixed-top">
+        <div class="container">
+            <!-- a class="navbar-brand" href="#">Start Bootstrap </a-->
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarResponsive">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item ">
+                        <a class="nav-link" href="/templates/records.html">考勤记录
+                            <span class="sr-only">(current)</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/templates/correction.html">勘正样本</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/templates/update.html">更新识别模型</a>
+                    </li>
+                    <li class="nav-item active">
+                        <a class="nav-link" href="/templates/settings.html">监控系统设置</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <div id="app">
+        <!-- Page Content -->
+        <div class="container">
+
+            <!-- Page Heading -->
+            <h1 class="my-4">监控系统设置
+                <!--small>Secondary Text</small -->
+            </h1>
+            <p class="showResult">{{result}}</p>
+            <table>
+                <tr>
+                    <td rowspan="2" style="text-align: right">开始时间</td>
+                    <td rowspan="2" style="text-align: left">
+                        <el-time-picker v-model="value1" :picker-options="{
+                              selectableRange: '00:00:00 - 23:59:59'
+                            }" placeholder="任意时间点">
+                        </el-time-picker>
+                    </td>
+                    <td rowspan="2" style="text-align: right">结束时间</td>
+                    <td rowspan="2" style="text-align: left">
+                        <el-time-picker v-model="value2" :picker-options="{
+                              selectableRange: '0:00:00 - 23:59:59'
+                            }" placeholder="任意时间点">
+                        </el-time-picker>
+                    </td>
+                    <td style="text-align: right">
+                        <el-radio v-model="radio" label="1">运动检测模式</el-radio>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align: right">
+                        <el-radio v-model="radio" label="2">考勤检测模式</el-radio>
+                    </td>
+
+                </tr>
+
+            </table>
+            <div class="btnContainer">
+                <el-button type="primary" @click="submitSettings">提交</el-button>
+                <el-button type="primary" @click="resetSettings">重置</el-button>
+            </div>
+        </div>
+
+</body>
+
+</html>
+
+{% endraw %}

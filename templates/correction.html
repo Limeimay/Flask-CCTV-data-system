@@ -1,0 +1,140 @@
+{% raw %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <title>4 Col Portfolio - Start Bootstrap Template</title>
+  <script type="text/javascript" src="/static/jquery/jquery.min.js" charset="UTF-8"></script>
+  <script type="text/javascript" src="/static/bootstrap/js/bootstrap.min.js"></script>
+  <script type="text/javascript" src="/static/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script type="text/javascript" src="/static/Scripts/vue/dist/vue.js" charset="UTF-8"></script>
+  <script src="/static/Scripts/axios/dist/axios.min.js"></script>
+  <script src="/static/Scripts/element-ui/lib/index.js"></script>
+
+  <link href="/static/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+  <link rel="stylesheet" href="/static/Scripts/element-ui/lib/theme-chalk/index.css" />
+  <!-- Custom styles for this template -->
+  <link href="/static/css/4-col-portfolio.css" rel="stylesheet">
+
+  <style>
+      .input-item {display: block;width: 300px;}
+      .date-input { margin-right: 10%;width: 120px}
+      .name-input {margin-left: 10%}
+      .data-container {display: flex;display: -webkit-flex;justify-content: flex-start;flex-wrap: wrap;}
+      .data-item{width:10%;border: 1px solid black;}
+      .show-image{ display: block;width: 100%;height: 200px;}
+      .el-date-editor.el-input, .el-date-editor.el-input__inner{width: 140px; }
+  </style>
+
+</head>
+
+<body>
+
+  <header class="text-white">
+    <div class="container text-center">
+      <h1>人脸考勤与陌生人鉴别视频监控管理系统</h1>
+    </div>
+  </header>>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+    <div class="container">
+      <!-- a class="navbar-brand" href="#">Start Bootstrap </a-->
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item ">
+            <a class="nav-link" href="/templates/records.html">考勤记录
+              <span class="sr-only">(current)</span>
+            </a>
+          </li>
+          <li class="nav-item active">
+            <a class="nav-link" href="/templates/correction.html">勘正样本</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/templates/update.html">更新识别模型</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/templates/settings.html">监控系统设置</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+    <div id="app">
+    <div class="container" class="app">
+      <h1 class="my-4" style="text-align: center">勘正样本</h1>
+      <div style="display: flex; display: -webkit-flex; justify-content: center; width: 60%;margin: 20px auto">
+                <div class="input-item ">
+                    <el-date-picker v-model="param.startTime" type="date" placeholder="开始时间" style="width: 140px" @change="loadData"></el-date-picker>-
+                    <el-date-picker v-model="param.endTime" type="date" placeholder="结束时间"@change="loadData"></el-date-picker>
+                </div>
+                <div class="input-item name-input">
+                    <el-input placeholder="请输入姓名" v-model="param.person" prefix-icon="el-icon-search" clearable @keyup.native="loadData"></el-input>
+                </div>
+            </div>
+      <div class="data-container">
+                <div v-for="record in records" class="data-item" style="width:20%;margin-right: 5%;border:1px solid gray;margin-top: 20px">
+                    <a :href="record.src" target="_blank">
+                        <img :src="record.src" class="show-image"> </a>
+                    <div style="padding: 10px;">
+                        <p>记录{{record.id}}</p>
+                        <p>时间:{{record.time}}</p>
+                        <p>识别结果:{{record.person}}</p>
+                        <p>勘正:
+                          <el-select v-model="record.corrected_name" clearable :placeholder="record.person">
+                            <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value"></el-option>
+                          </el-select>
+                        </p>
+                    </div>
+                </div>
+      </div>
+      <div style="text-align: center;margin-top: 30px;"><el-pagination @current-change="loadData" :current-page.sync="param.page"  :total="total"></el-pagination></div>
+      <div style="display: flex; justify-content: center;margin-top: 20px">
+            <el-button type="primary" @click="submitCorrection" >提交勘正结果</el-button>
+      </div>
+
+    </div>
+  </div>
+<script>
+      var vm = new Vue({
+        el: "#app",
+        data: {
+          records: [],
+          options:[],
+          total:undefined,
+          param:{startTime: '',endTime:'', person: '',page:1,},
+
+        },
+        methods: {
+          loadData(){
+            var _this=this
+             axios.post('/get_database_data',_this.param).then(function(response){
+              _this.records=response.data.records;
+              _this.total=response.data.length;
+              _this.options=response.data.options
+            })
+          },
+          submitCorrection: function () {
+            this.records.forEach(element => element.corrected_name = element.corrected_name ===""?element.person:element.corrected_name );
+            axios.post("/correct_8records",this.records).then((resp)=>{
+              this.records=resp.data[0].records;
+              this.total=resp.data[0].length;
+              this.options=resp.data[0].options
+            })
+          },
+        },
+        mounted:function(){
+          return this.loadData()
+        }
+      })
+  </script>
+</body>
+</html>
+{% endraw %}
